@@ -1,0 +1,316 @@
+n = 4;
+initWall(n);
+%w = getW();
+%disp(w)
+%ここまでOK
+%initM(n);
+initRraw(ones(n,n-1));
+initRcolumn(ones(n-1,n));
+
+W4NNtoDraw();
+rraw = getRraw();
+rcolumn = getRcolumn();
+disp(rraw);
+%disp(rcolumn);
+
+%DrawMaze();
+%x = 1;
+%y = 1;
+%v16toNN(x,y);
+%m = getM();
+%disp(m(x,y)); % 16進数確認
+
+
+function DrawMaze
+    global N
+    global Rcolumn
+    global Rraw
+    x1 = 1;
+    y1 = 0;
+    x2 = 1;
+    y2 = 1;
+    nw = N;
+    nh = N;
+
+    raw=1;
+    column=1;
+    while x2 <= nw-1
+        
+        while y2 <= nh
+        %h = drawline(uax,'SelectedColor','black','Position',[x1 y1; x2 y2],'Visible','on');
+        %plot([x1 x2],[y1 y2],'Color','black','ButtonDownFcn',@linuCallback,'LineWidth',1.8);
+        r1 = rectangle('Position',[x1-0.05 y1+0.1 0.1 1-0.2],'FaceColor','k','ButtonDownFcn',@lineCallback);
+        r1.UserData = [1 raw column];
+        if Rcolumn(raw,column) == 1 %N×N-1
+            r1.FaceColor = 'k';%'#D7E5EE';%'#DEE4E9'; %グレー
+            r1.LineStyle = '-';
+            r1.LineWidth = 0.5;
+            r1.EdgeColor = 'k';
+        else
+            r1.FaceColor = 'w';
+            r1.LineStyle = '-';
+            r1.LineWidth = 0.5;
+            r1.EdgeColor = 'w';
+        end
+
+        %Rraw(raw, column) =uint8(1);
+        y2 = y2 + 1;
+        y1 = y1 + 1;
+        hold on;
+        column = column+1;
+        end
+    
+    y1 = 0;
+    y2 = 1;
+    x1 = x1 + 1;
+    x2 = x2 + 1;
+    raw = raw+1;
+    column = 1;
+    
+    end
+    
+    column = 1;
+    raw = 1;
+    x1 = 0;
+    y1 = 1;
+    x2 = 1;
+    y2 = 1;
+    while y2 <= nh-1
+        while x2 <= nw
+        %h = drawline(uax,'SelectedColor','black','Position',[x1 y1; x2 y2],'Visible','on');
+        %plot([x1 x2],[y1 y2],'Color','black','ButtonDownFcn',@linuCallback,'LineWidth',1.8);
+        r2 = rectangle('Position',[x1+0.1 y1-0.05 1-0.2 0.1],'FaceColor','k','ButtonDownFcn',@lineCallback);
+        r2.UserData = [2 raw column];
+        if Rraw(raw,column) == 1
+            r2.FaceColor = 'k';%'#D7E5EE';%'#DEE4E9'; %グレー
+            r2.LineStyle = '-';
+            r2.LineWidth = 0.5;
+            r2.EdgeColor = 'k';
+        else
+            r2.FaceColor = 'w';
+            r2.LineStyle = '-';
+            r2.LineWidth = 0.5;
+            r2.EdgeColor = 'w';
+        end
+        %Rcolumn(raw, column) = uint8(2);
+        x2 = x2 + 1;
+        x1 = x1 + 1;
+        raw = raw + 1;
+        end
+    
+    y1 = y1+1;
+    y2 = y2+1;
+    x1 = 0;
+    x2 = 1;
+    column = column + 1;
+    raw = 1;
+    end
+    xlim([0 N]);
+    ylim([0 N]);
+    pbaspect([1 1 1]);
+
+end
+% Wから16進数はできた
+% Wから16進数の行列に格納
+
+% 4NNからdraw %一括変換する
+function W4NNtoDraw 
+    %端を参照しない. Drawは端の領域無
+    %
+    %global W 
+    global Rraw
+    global Rcolumn
+    global N 
+    %columnの(n,4)がおかしい
+    w = getW();
+    for y = 1:N
+        for x = 1:N
+            pos = (y-1)*N + x;
+            if x ~= N && y ~= N
+                Rraw(y,x) = w(1,pos);   %北
+                Rcolumn(x,y) = w(2,pos);     %東
+                %disp(Rcolumn(x,y));
+                %disp(y);
+            elseif y == N && x ~= N
+                Rcolumn(x,y) = w(2,pos);     %東
+                disp(y);
+            elseif x == N && y ~= N
+                Rraw(y,x) = w(1,pos);   %北
+            end
+            % 東と北だけで大丈夫
+            %Rraw(x,y) = W(3,pos);      %南
+            %Rcolumn(x,y) = W(4,pos);   %西
+        end
+    end
+    disp(Rcolumn(1,4));
+    disp(Rcolumn(2,4));
+    disp(Rcolumn(3,4));
+end
+function initRraw(val)
+    global Rraw 
+    % = zeros(nw-1,nh);
+    Rraw = val;
+end
+function initRcolumn(val)
+    global Rcolumn 
+    % = zeros(nw-1,nh);
+    Rcolumn = val;
+end
+function setRraw(a,b,val)
+    global Rraw
+    Rraw(a,b) = val;
+end
+function setRcolumn(a,b,val)
+    global Rcolumn
+    Rcolumn(a,b) = val;
+end
+function rraw = getRraw
+    global Rraw
+    rraw = Rraw;
+end 
+function rcolumn = getRcolumn
+    global Rcolumn
+    rcolumn = Rcolumn;
+end 
+function val = getR(n,raw,column)
+    if n == 1
+        global Rcolumn
+        val = Rcolumn(raw,column);
+    end
+    if n == 2
+        global Rraw
+        val = Rraw(raw,column);
+    end
+end
+% drawから4NN
+function DrawtoW4NN
+    
+end
+
+function NNtoVar16(x,y)%座標の壁情報を、アルゴリズムで使用するための16進数配列に格納
+    global M
+    M(x,y) = W4nntoM16(x,y);
+end
+function Var16toNN(x,y) % 座標の16進数情報を、描画処理用の配列に渡すための壁情報配列に格納
+    global W  
+    global N
+    pos = (y-1)*N + x;
+    bit = M16toW4nn(x,y);
+    W(1, pos) = bit(1,1);
+    W(2, pos) = bit(1,2);
+    W(3, pos) = bit(1,3);
+    W(4, pos) = bit(1,4);
+end
+function initM(n)
+    global M
+    M = dec2hex(zeros(n,n));
+end
+function m = getM
+    global M
+    m = M;
+end
+
+
+function initWall(n)
+    global W 
+    global N 
+    N = n;
+    W = zeros(4,N*N);
+
+    for cnt = 0:N-1
+        W(1,(N*(N-1)) + cnt+1) = 1; %北
+        W(2,N + (N*cnt)) = 1;       %東
+        W(3,1 + cnt) = 1;           %南
+        W(4,1 + (N*cnt)) = 1;       %西
+    end
+    %スタート時の右壁もある
+    W(2,1) = 1;
+end
+function w = getW()
+    global W 
+    w = W;
+end
+function c = W4nntoM16(x,y) %nは1辺の区画数
+    %W(座標)から値を取得し、1×4行列を作成。
+    %1×4行列の組み合わせから文字を決定。ビットで。
+    global W
+    global N
+    num = (y-1)*N + x;
+    bit = W(1,num);
+    bit = bit + 2*W(2,num);
+    bit = bit + 4*W(3,num);
+    bit = bit + 8*W(4,num);
+    c = dec2hex(bit);
+end
+function nn = M16toW4nn(x,y)
+    global M 
+    bit = zeros(1, 4);
+    dec = hex2dec(M(x,y));
+    if  dec / 8 == 1
+        bit(1,4) = 1;
+        dec = dec - 8;
+    else
+        bit(1,4) = 0;
+    end
+
+    if(dec /4) == 1
+        bit(1,3) = 1;
+        dec = dec - 4;
+    else
+        bit(1,3) = 0;
+    end
+
+    if(dec /2) == 1
+        bit(1,2) = 1;
+        dec = dec - 2;
+    else
+        bit(1,2) = 0;
+    end
+    if(dec /1) == 1
+        bit(1,1) = 1;
+    else
+        bit(1,1) = 0;
+    end
+    
+    nn = bit;
+
+end
+function lineCallback(src,~)
+    
+    persistent i
+    if isempty(i)
+        i = 0;
+    end
+    
+    if rem(i,2)
+        src.FaceColor = 'k';%'#D7E5EE';%'#DEE4E9'; %グレー
+        src.LineStyle = '-';
+        src.LineWidth = 0.5;
+        src.EdgeColor = 'k';
+    else
+        src.FaceColor = 'w';
+        src.LineStyle = '-';
+        src.LineWidth = 0.5;
+        src.EdgeColor = 'w';
+    end
+
+    %クリックされたときに01をどこに書き込むべきかがわかればいい
+    % UserDataを変換すれば、16進数に置きなおせる状態
+    %disp(src.UserData(1,3));
+    
+    if src.UserData(1, 1) == 1
+        disp(src.UserData);
+
+        setRcolumn(src.UserData(1,2),src.UserData(1,3),rem(i,2));
+        disp("あああ");
+    end
+    if src.UserData(1, 1) == 2
+        disp(src.UserData);
+        setRraw(src.UserData(1,2),src.UserData(1,3),rem(i,2));
+    end
+        
+    i = i + 1;
+    if i==2
+        i=0;
+    end
+end
