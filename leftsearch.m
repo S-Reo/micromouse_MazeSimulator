@@ -1,4 +1,4 @@
-function leftsearch(ax,n)
+function leftsearch(ax,n,body)
   
     global N 
     global M
@@ -17,28 +17,30 @@ function leftsearch(ax,n)
     %start
     y = y + 1;
     setXY(x,y);
-    t = timer('TimerFcn', 'stat=false; disp(''Timer!'')','StartDelay',10);
-    start(t)
-    stat=true;
+    %t = timer('TimerFcn', 'stat=false; disp(''Timer!'')','StartDelay',10);
+    %start(t)
+    %stat=true;
     disp("OK");
     disp(M);
     % クラスにしたい
     
-    while(stat==true)
+    %while(stat==true)
         while x ~= goal_x || y ~= goal_y
-            tic
+            
             disp("壁情報, デバッグ"); %1の32の壁は1101じゃないといけない 向き確認、
             %今いる座標の（0から15）を取得
             myM(x,y) = M(x,y);
-            disp(M(x,y)); %9になってる
+            %disp(M(x,y)); %9になってる
             %今いる座標の壁の有無を表す1×4行列に変換
             now_wall = M16toW4nn(x,y);
-            disp(now_wall);
+            %disp(now_wall);
             %1×4行列と今の方角から前後左右の壁の情報を取得
             w = getNowWall(car,now_wall);
             %前後左右の壁の情報から進行方向を決定
-            disp(w);
+            %disp(w);
             %元の方角と進行方向から座標を更新
+            %ここまで0.04秒くらい
+            
             if w(1,4) == 0 %左||
                 dir = 3;
             elseif w(1,1) == 0%前 8,10
@@ -48,21 +50,25 @@ function leftsearch(ax,n)
                 dir = 1;
             elseif w(1,3) == 0%後
                 dir = 2;
-            end
+            end %ここは0.000004くらい
+            
             [x, y] = changeposition(dir,car);
             setXY(x,y);
             % 移動した方向と現在の方角から新しい方角に変更
             car = changecardinal(dir);
+            
+            
             % 移動先の座標に円を描画
-            drawMouse(x,y);
-            toc
+            drawMouse(x,y,body); %ここだけで0.3秒
+            %pause(0.1);
+            
         end
         disp("Fin");
-        stat = false;
+        %stat = false;
 
-    end
+    %end
 
-    disp(myM);
+    %disp(myM);
     
 end
 %向いている方角と壁の1×4行列から、前後左右の壁の状態を返す
@@ -254,11 +260,17 @@ function setMouse(n)
     Y = 1;
 end
 
-function drawMouse(x,y)
-    global myAxis
+function drawMouse(x,y,body)
+    %global myAxis
     %h = viscircles([x-0.5 y-0.5],0.3,myAxis);
     %clc
-    rectangle(myAxis,"Position",[x-0.7 y-0.7 0.4 0.4],"Curvature",[1 1],'FaceColor','r');
+    tic
+    set(body,'Position',[x-0.7 y-0.7 0.4 0.4]);
+    toc
+    tic
+    drawnow;
+    toc
+    %rectangle(myAxis,"Position",[x-0.7 y-0.7 0.4 0.4],"Curvature",[1 1],'FaceColor','r');
 end
 function setAxis(ax)
     global myAxis
