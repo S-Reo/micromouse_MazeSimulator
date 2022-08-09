@@ -1,4 +1,4 @@
-function DrawMaze(ax)
+function DrawMaze(fg,ax)
     global N
     global Rcolumn
     global Rraw
@@ -11,6 +11,9 @@ function DrawMaze(ax)
 
     raw=1;
     column=1;
+    figure(fg);
+    %disp("DrawMazeのwhile文");
+    %tic
     while x2 <= nw-1
         
         while y2 <= nh
@@ -46,6 +49,7 @@ function DrawMaze(ax)
     
     end
     
+    hold on;
     column = 1;
     raw = 1;
     x1 = 0;
@@ -73,6 +77,7 @@ function DrawMaze(ax)
         x2 = x2 + 1;
         x1 = x1 + 1;
         raw = raw + 1;
+        hold on;
         end
     
     y1 = y1+1;
@@ -82,8 +87,48 @@ function DrawMaze(ax)
     column = column + 1;
     raw = 1;
     end
-    %ax.Xlim = [0 N];
-    %ax.Xlim = [0 N];
-    %pbaspect([1 1 1]);
+    
+    xlim([0 N]);
+    ylim([0 N]);
+    pbaspect([1 1 1]);
+    %toc
+end
+function lineCallback(src,~)
+    
+    persistent i
+    if isempty(i)
+        i = 0;
+    end
+    
+    if rem(i,2)
+        src.FaceColor = 'k';%'#D7E5EE';%'#DEE4E9'; %グレー
+        src.LineStyle = '-';
+        src.LineWidth = 0.5;
+        src.EdgeColor = 'k';
+    else
+        src.FaceColor = 'w';
+        src.LineStyle = '-';
+        src.LineWidth = 0.5;
+        src.EdgeColor = 'w';
+    end
 
+    %クリックされたときに01をどこに書き込むべきかがわかればいい
+    % UserDataを変換すれば、16進数に置きなおせる状態
+    %disp(src.UserData(1,3));
+    
+    if src.UserData(1, 1) == 1
+        disp(src.UserData);
+
+        setRcolumn(src.UserData(1,2),src.UserData(1,3),rem(i,2));
+        disp("あああ");
+    end
+    if src.UserData(1, 1) == 2
+        disp(src.UserData);
+        setRraw(src.UserData(1,2),src.UserData(1,3),rem(i,2));
+    end
+        
+    i = i + 1;
+    if i==2
+        i=0;
+    end
 end

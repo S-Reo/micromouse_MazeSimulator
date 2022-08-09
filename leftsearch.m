@@ -21,6 +21,8 @@ function leftsearch(ax,n)
     start(t)
     stat=true;
     disp("OK");
+    % クラスにしたい
+    
     while(stat==true)
         while x ~= goal_x || y ~= goal_y
             disp("壁情報, デバッグ");
@@ -49,7 +51,7 @@ function leftsearch(ax,n)
             car = changecardinal(dir);
             % 移動先の座標に円を描画
             drawMouse(x,y);
-            pause(0.1);
+            pause(1);
         end
         disp("Fin");
         stat = false;

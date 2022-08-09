@@ -1,0 +1,20 @@
+function [maze_size,rraw, rcolumn,filename] = getR_raw_column
+        %%テキストファイルの選択
+    [filename, pathname] = uigetfile({'*.txt'}, 'Select the Maze Text about DrawMatrix');
+    new_filename = sprintf("%s%s",pathname,filename);
+    %new_filename = 'MazeTextData/MM2021MM.png.txt';
+    %% ファイルから行列変数に格納
+    m = readmatrix(new_filename,'FileType','text'); %'TrimNonNumeric'true,,'FileType','text' 
+    
+    %% サイズを取得
+    sz = size(m);
+    maze_size = sz(1,1); %行数だけ取得
+
+    %% RrawとRcolumnに切り分けて格納
+    rraw = m(:,sz+1:2*sz); N
+    rcolumn = m(:,1:sz);
+    
+    f = msgbox(sprintf('迷路サイズは %d です', maze_size)); % 迷路サイズの表示
+    f.Position(1:2) = [500 100];
+    disp(f.Position);
+end

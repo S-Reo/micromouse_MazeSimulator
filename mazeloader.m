@@ -1,4 +1,4 @@
-function [n walldata] = mazeloader
+function [n, walldata, filename] = mazeloader
 %% ì¸óÕ
 [filename, pathname] = uigetfile({'*.jpg;*.png;*.gif'}, 'Select the Maze Imgae');
 
@@ -51,10 +51,13 @@ wall = wall + 8 * vwall(:, 1:end-1);    % êº 2 bit
 
 %% ÉtÉ@ÉCÉãÇ…ï€ë∂
 output = reshape(sprintf('%x',wall), maze_size, maze_size);
+%MazeData = zeros(maze_size,maze_size);
 
 output = ['"'*ones(maze_size, 1) output '",'.*ones(maze_size,1)];
-new_filename = sprintf('%s.txt', filename);
-dlmwrite(new_filename, output, 'precision', '%c', 'delimiter', '');
+new_filename = sprintf('MazeTextData/%s.txt', filename);
+%dlmwrite(new_filename, output, 'precision', '%c', 'delimiter', '');
 n = maze_size;
 walldata = wall;
+%disp(walldata);
+writematrix(walldata,new_filename);
 end

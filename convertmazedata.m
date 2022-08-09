@@ -1,18 +1,31 @@
 %% 自分用スクリプト
+
 %% 迷路用の16進数配列に格納
 function convertmazedata(maze_size, walldata)
-initM(maze_size);
-initWall(maze_size);
-initRraw(ones(maze_size,maze_size-1));
-initRcolumn(ones(maze_size-1,maze_size));
 
-%x = 1;
-%y = maze_size;
+%[maze_size, walldata,filename] = getMazeMatrix();
+
+%%外壁と東の壁を1にした壁配列を生成 (4 × N*N行列)
+%disp("initWall");
+
+initWall(maze_size);
+
 %配列スタートはx=1,y=maze_size。
+
+
+%% N * N行列を作成
+%disp("initM");
+
+initM(maze_size);
+
+
+%% 壁のテキストデータを、自分用の壁のN*N行列に格納し、壁の行列に
+%disp("for文変換");
 for y = maze_size:-1:1
     for x = 1:1:maze_size
         setM(x,maze_size+1-y,walldata(y,x));
-        Var16toNN(x,maze_size+1-y);
+        
+
         %m = getM;
         %disp(m(x,17-y));
         %disp(m);
@@ -21,9 +34,26 @@ for y = maze_size:-1:1
     end
 end
 
+Var16toNN();
+
+%%
 %m = getM;
 %w = getW;
+
+
+%% 壁描画用の配列
+% 1で初期化
+%disp("描画配列作成");
+%initRraw(ones(maze_size,maze_size-1));
+%initRcolumn(ones(maze_size-1,maze_size));
+initRraw(ones(maze_size,maze_size));
+initRcolumn(ones(maze_size,maze_size));
+
+% 壁判定用の行列から壁描画用の行列に変換
+%disp("描画配列変換");
+
 W4NNtoDraw();
+
 %rraw = getRraw();
 %rcolumn = getRcolumn();
 %Mから壁配列に変換
@@ -128,15 +158,25 @@ function NNtoVar16(x,y)%座標の壁情報を、アルゴリズムで使用す�
     global M
     M(x,y) = W4nntoM16(x,y);
 end
-function Var16toNN(x,y) % 座標の16進数情報を、描画処理用の配列に渡すための壁情報配列に格納
+function Var16toNN % 座標の16進数情報を、描画処理用の配列に渡すための壁情報配列に格納
     global W  
     global N
-    pos = (y-1)*N + x;
-    bit = M16toW4nn(x,y);
-    W(1, pos) = bit(1,1);
-    W(2, pos) = bit(1,2);
-    W(3, pos) = bit(1,3);
-    W(4, pos) = bit(1,4);
+    for y = N:-1:1
+        for x = 1:1:N
+            
+            pos = (y-1)*N + x;
+            
+            
+            bit = M16toW4nn(x,y);
+            
+            
+            W(1, pos) = bit(1,1);
+            W(2, pos) = bit(1,2);
+            W(3, pos) = bit(1,3);
+            W(4, pos) = bit(1,4);
+            
+        end
+    end
     %disp(pos);
 end
 
@@ -174,41 +214,90 @@ function c = W4nntoM16(x,y) %nは1辺の区画数
     c = bit;
 end
 function nn = M16toW4nn(x,y)
+    
+    disp("(=_=)");
+    
     global M 
+    %tic
     bit = zeros(1, 4);
-    dec = M(x,y);
-    %disp(dec);
-    [q, r]=quorem(sym(dec),sym(8)); %西
-    if  q == 1
+    dec = sym(M(x,y));
+    
+    
+    %{
+    先にsym宣言した場合
+    経過時間は 0.000124 秒です。宣言の処理
+    経過時間は 0.005934 秒です。quoremの処理
+    %}
+    %{
+    quorem内で変換した場合
+    経過時間は 0.005820 秒です。
+    %}
+    %tic
+    
+    [q, r]=quorem(dec,sym(8)); %西
+    %0.006480
+    %toc
+    
+    if  q
         bit(1,4) = 1;
         dec = dec - 8;
+        if r == 0
+            bit(1,1) = 0;
+            bit(1,2) = 0;
+            bit(1,3) = 0;
+            nn = bit;
+            return
+        end
     else
         bit(1,4) = 0;
-    end
-    [q, r]=quorem(sym(dec),sym(4));%南
-    if q == 1
+    end%0.001470 →0.000783
+    [q, r]=quorem(dec,sym(4));%南
+    if q
         bit(1,3) = 1;
         dec = dec - 4;
+        if r == 0
+            bit(1,1) = 0;
+            bit(1,2) = 0;
+            bit(1,4) = 0;
+            nn = bit;
+            return
+        end
     else
         bit(1,3) = 0;
     end
-    [q, r]=quorem(sym(dec),sym(2));
-    if q == 1
+    
+    [q, r]=quorem(dec,sym(2));
+    if q
         bit(1,2) = 1;
         dec = dec - 2;
+        if r == 0
+            bit(1,1) = 0;
+            bit(1,3) = 0;
+            bit(1,4) = 0;
+            nn = bit;
+            return
+        end
     else
         bit(1,2) = 0;
     end
-    [q, r]=quorem(sym(dec),sym(1));
-    if q == 1
+
+    [q, r]=quorem(dec,sym(1));
+    if q
         bit(1,1) = 1;
+        if r == 0
+            bit(1,4) = 0;
+            bit(1,2) = 0;
+            bit(1,3) = 0;
+            nn = bit;
+            return
+        end
     else
         bit(1,1) = 0;
     end
     %disp(bit);
     
     nn = bit;
-
+    
 end
 function lineCallback(src,~)
     
