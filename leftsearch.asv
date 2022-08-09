@@ -7,13 +7,13 @@ function leftsearch(ax,n)
     setMouse(N)
     setmyWall();
     setAxis(ax);
-    goal_x = 7;
-    goal_y = 10;
+    goal_x = 17;
+    goal_y = 16;
     x = 1;
     y = 1;
     setXY(x,y);
-    car = 0;
-    dir = 0;
+    car = uint16(0);
+    dir = uint16(0);
     %start
     y = y + 1;
     setXY(x,y);
@@ -21,8 +21,12 @@ function leftsearch(ax,n)
     start(t)
     stat=true;
     disp("OK");
+    % クラスにしたい
+    
     while(stat==true)
         while x ~= goal_x || y ~= goal_y
+            tic
+            disp("壁情報, デバッグ"); %1の32の壁は1101じゃないといけない 向き確認、
             %今いる座標の（0から15）を取得
             myM(x,y) = M(x,y);
             %今いる座標の壁の有無を表す1×4行列に変換
@@ -34,21 +38,21 @@ function leftsearch(ax,n)
             %元の方角と進行方向から座標を更新
             if w(1,4) == 0 %左||
                 dir = 3;
-                %h = viscircles(ax,[x*0.5 y*0.5],0.3);
             elseif w(1,1) == 0%前 8,10
                 dir = 0;
+                %h = viscircles(ax,[x*0.5 y*0.5],0.3);
             elseif w(1,2) == 0%右
                 dir = 1;
             elseif w(1,3) == 0%後
                 dir = 2;
             end
             [x, y] = changeposition(dir,car);
-            
+            setXY(x,y);
             % 移動した方向と現在の方角から新しい方角に変更
             car = changecardinal(dir);
             % 移動先の座標に円を描画
             drawMouse(x,y);
-            pause(0.2);
+            toc
         end
         disp("Fin");
         stat = false;
@@ -132,11 +136,14 @@ function setXY(x,y)
     X = x;
     Y = y;
 end
-function [x, y] = changeposition(dir,car)
+function [x, y] = changeposition(dir,car) %現在の方角と、選んだ進行方向から、xyを更新
     global X 
     global Y 
     d = rem(dir,4);
     c = rem(car,4);
+    debug = zeros(1,6);
+    debug = [c car d dir X Y];
+    disp(debug);
     if c == 0 %北
         if d == 0
             x = X;
@@ -194,6 +201,7 @@ function [x, y] = changeposition(dir,car)
             y = Y - 1;
         end
     end
+    
                 
 end
 function car = changecardinal(dir)
@@ -210,6 +218,7 @@ function car = changecardinal(dir)
     else
         disp("carが変更されていない!");
     end
+    Car = car;
 end
 function setmyWall
     global myW 
@@ -236,8 +245,8 @@ function setMouse(n)
         end
     end
     
-    Car = 0;
-    Dir = 0;
+    Car = uint16(0);
+    Dir = uint16(0);
     X = 1;
     Y = 1;
 end

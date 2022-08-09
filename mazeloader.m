@@ -58,6 +58,6 @@ new_filename = sprintf('MazeTextData/%s.txt', filename);
 %dlmwrite(new_filename, output, 'precision', '%c', 'delimiter', '');
 n = maze_size;
 walldata = wall;
-%disp(walldata);
+disp(walldata);
 writematrix(walldata,new_filename);
 end

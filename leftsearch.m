@@ -21,15 +21,19 @@ function leftsearch(ax,n)
     start(t)
     stat=true;
     disp("OK");
+    disp(M);
     % クラスにしたい
     
     while(stat==true)
         while x ~= goal_x || y ~= goal_y
-            disp("壁情報, デバッグ");
+            tic
+            disp("壁情報, デバッグ"); %1の32の壁は1101じゃないといけない 向き確認、
             %今いる座標の（0から15）を取得
             myM(x,y) = M(x,y);
+            disp(M(x,y)); %9になってる
             %今いる座標の壁の有無を表す1×4行列に変換
             now_wall = M16toW4nn(x,y);
+            disp(now_wall);
             %1×4行列と今の方角から前後左右の壁の情報を取得
             w = getNowWall(car,now_wall);
             %前後左右の壁の情報から進行方向を決定
@@ -51,7 +55,7 @@ function leftsearch(ax,n)
             car = changecardinal(dir);
             % 移動先の座標に円を描画
             drawMouse(x,y);
-            pause(1);
+            toc
         end
         disp("Fin");
         stat = false;

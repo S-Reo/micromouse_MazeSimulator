@@ -91,6 +91,7 @@ function DrawMaze(fg,ax)
     xlim([0 N]);
     ylim([0 N]);
     pbaspect([1 1 1]);
+    %pause(0.3);
     %toc
 end
 function lineCallback(src,~)
@@ -131,4 +132,13 @@ function lineCallback(src,~)
     if i==2
         i=0;
     end
+end
+
+function setRraw(a,b,val)
+    global Rraw
+    Rraw(a,b) = val;
+end
+function setRcolumn(a,b,val)
+    global Rcolumn
+    Rcolumn(a,b) = val;
 end

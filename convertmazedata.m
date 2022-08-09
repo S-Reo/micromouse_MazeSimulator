@@ -24,7 +24,12 @@ initM(maze_size);
 for y = maze_size:-1:1
     for x = 1:1:maze_size
         setM(x,maze_size+1-y,walldata(y,x));
-        
+        disp("Mと元の壁データ")
+        m = getM;
+        disp(x);
+        disp(maze_size+1-y);
+        disp(m(x,maze_size+1-y));
+        disp(walldata(y,x));
 
         %m = getM;
         %disp(m(x,17-y));
@@ -32,8 +37,11 @@ for y = maze_size:-1:1
         %w = getW;
         %disp(w(1:4,(17-y-1)*maze_size + x));
     end
-end
+end %ここまでM合ってる
 
+%m = getM;
+        %disp(m(x,17-y));
+        %disp(m);
 Var16toNN();
 
 %%
@@ -53,9 +61,11 @@ initRcolumn(ones(maze_size,maze_size));
 %disp("描画配列変換");
 
 W4NNtoDraw();
-
-%rraw = getRraw();
-%rcolumn = getRcolumn();
+%disp("columnの1行32列が1ならok");
+rraw = getRraw();
+rcolumn = getRcolumn();%1行32列が1ならok
+disp(rraw);
+disp(rcolumn);
 %Mから壁配列に変換
 
 %disp(dec2hex(wall));
@@ -77,7 +87,39 @@ end
 
 % Wから16進数はできた
 % Wから16進数の行列に格納
+% drawから4NN
+function DrawtoW4NN
+    global N
+    initWall(N);
+        %端を参照しない. Drawは端の領域無
+   
+    global Rraw
+    global Rcolumn
+    global W 
+    %columnの(n,4)がおかしい
 
+    for y = 1:(N-1)
+        for x = 1:(N-1)
+            pos = (y-1)*N + x;
+            W(1,pos) = Rraw(x,y); %北
+            W(2,pos) = Rcolumn(x,y);%東
+            W(3,pos+N) = Rraw(x,y); %南
+            W(4,pos+1) = Rcolumn(x,y);%西
+        end
+    end
+
+    for x = 1:(N-1)
+        pos = x;
+        W(2,pos) = Rcolumn(x,N);
+        W(4,pos+1) = Rcolumn(x,N);
+    end
+
+    for y = 1:(N-1)
+        pos = y*N;
+        W(1,pos) = Rraw(N,y);
+        W(3,pos+N) = Rraw(N,y);
+    end
+end
 % 4NNからdraw %一括変換する
 function W4NNtoDraw 
     %端を参照しない. Drawは端の領域無
@@ -107,8 +149,14 @@ function W4NNtoDraw
                 %disp("あ");disp(y);disp(x);
             end
             % 東と北だけで大丈夫
-            %Rraw(x,y) = W(3,pos);      %南
-            %Rcolumn(x,y) = W(4,pos);   %西
+            disp("wとRraw,Rcolumn");
+            disp(x);
+            disp(y);
+            disp(w(1,pos));
+            disp(w(2,pos));
+            disp(Rraw(x,y));      %南
+            disp(Rcolumn(x,y));   %西
+
         end
     end
     
@@ -149,10 +197,7 @@ function val = getR(n,raw,column)
         val = Rraw(raw,column);
     end
 end
-% drawから4NN
-function DrawtoW4NN
-    
-end
+
 
 function NNtoVar16(x,y)%座標の壁情報を、アルゴリズムで使用するための16進数配列に格納
     global M
@@ -174,10 +219,12 @@ function Var16toNN % 座標の16進数情報を、描画処理用の配列に渡
             W(2, pos) = bit(1,2);
             W(3, pos) = bit(1,3);
             W(4, pos) = bit(1,4);
+
             
         end
     end
-    %disp(pos);
+    %disp("992列の東");
+    %disp(W(2,992));
 end
 
 
@@ -215,7 +262,7 @@ function c = W4nntoM16(x,y) %nは1辺の区画数
 end
 function nn = M16toW4nn(x,y)
     
-    disp("(=_=)");
+    %disp("(=_=)");
     
     global M 
     %tic
@@ -237,7 +284,11 @@ function nn = M16toW4nn(x,y)
     [q, r]=quorem(dec,sym(8)); %西
     %0.006480
     %toc
-    
+    disp("座標とqc");
+    debug = [x y];
+    disp(debug);
+    debug2 = [q r];
+    disp(debug2);
     if  q
         bit(1,4) = 1;
         dec = dec - 8;
@@ -252,13 +303,15 @@ function nn = M16toW4nn(x,y)
         bit(1,4) = 0;
     end%0.001470 →0.000783
     [q, r]=quorem(dec,sym(4));%南
+    debug2 = [q r];
+    disp(debug2);
     if q
         bit(1,3) = 1;
         dec = dec - 4;
         if r == 0
             bit(1,1) = 0;
             bit(1,2) = 0;
-            bit(1,4) = 0;
+            %bit(1,4) = 0;
             nn = bit;
             return
         end
@@ -267,13 +320,15 @@ function nn = M16toW4nn(x,y)
     end
     
     [q, r]=quorem(dec,sym(2));
+    debug2 = [q r];
+    disp(debug2);
     if q
         bit(1,2) = 1;
         dec = dec - 2;
         if r == 0
             bit(1,1) = 0;
-            bit(1,3) = 0;
-            bit(1,4) = 0;
+            %bit(1,3) = 0;
+            %bit(1,4) = 0;
             nn = bit;
             return
         end
@@ -282,21 +337,17 @@ function nn = M16toW4nn(x,y)
     end
 
     [q, r]=quorem(dec,sym(1));
+    debug2 = [q r];
+    disp(debug2);
     if q
         bit(1,1) = 1;
-        if r == 0
-            bit(1,4) = 0;
-            bit(1,2) = 0;
-            bit(1,3) = 0;
-            nn = bit;
-            return
-        end
     else
         bit(1,1) = 0;
     end
     %disp(bit);
     
     nn = bit;
+    disp(nn);
     
 end
 function lineCallback(src,~)
